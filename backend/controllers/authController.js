@@ -1,7 +1,8 @@
 import User from "../models/User.js";
 import { hash, compare } from "bcryptjs";
-//import { sign } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
+//registration func
 const registration = async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -22,27 +23,30 @@ const registration = async (req, res) => {
   }
 }
 
-// const login = async (req, res) => {
-//   const { email, password } = req.body;
+// login funct
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-//   try {
-//     const user = await findOne({ email });
+  try {
+    const user = await User.findOne({ email });
 
-//     if (!user) return res.status(400).json({ msg: "User not found" });
+    if (!user) return res.status(400).json({ msg: "User not found" });
 
-//     const match = await compare(password, user.password);
+    const match = await compare(password, user.password);
 
-//     if (!match) return res.status(400).json({ msg: "Wrong password" });
+    if (!match) return res.status(400).json({ msg: "Wrong password" });
 
-//     const token = sign(
-//       { id: user._id, role: user.role },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1d" }
-//     );
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
-//     res.json({ token, user });
-//   } catch (err) {
-//     res.status(500).json({ msg: err.message });
-//   }
-// }
-export { registration };
+    res.json({ token, user });
+  } catch (err) {
+    console.log(err);
+    
+    res.status(500).json({ msg: err.message });
+  }
+}
+export { registration,login };
